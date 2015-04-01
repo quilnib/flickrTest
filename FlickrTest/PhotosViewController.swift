@@ -10,7 +10,7 @@ import UIKit
 
 let reuseIdentifier = "PhotoCell"
 
-class PhotosViewController: UICollectionViewController, UICollectionViewDelegate {
+class PhotosViewController: UICollectionViewController, UIViewControllerTransitioningDelegate {
 
     var flickrUserName: String?
     var flickrUserId: String?
@@ -46,7 +46,6 @@ class PhotosViewController: UICollectionViewController, UICollectionViewDelegate
         
         // Register cell classes
         self.collectionView!.registerClass(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        self.collectionView!.delegate = self
         self.title = "FlickrTest"
         self.collectionView?.backgroundColor = UIColor.whiteColor()
         
@@ -118,6 +117,17 @@ class PhotosViewController: UICollectionViewController, UICollectionViewDelegate
     
     // MARK: UICollectionViewDelegate
     
+    override func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+        var photo = self.photos[indexPath.row] as NSDictionary
+        var viewController = DetailViewController()
+        //set the viewController to use a custom transition.  Be sure to implement the UIViewControllerTransitioningDelegate protocol
+        viewController.modalPresentationStyle = UIModalPresentationStyle.Custom
+        viewController.transitioningDelegate = self //this is why we need to implement the UIViewControllerTransitioningDelegate protocol
+        viewController.photo = photo
+        
+        self.presentViewController(viewController, animated: true, completion: nil)
+    }
+    
     /*
     // Uncomment this method to specify if the specified item should be highlighted during tracking
     override func collectionView(collectionView: UICollectionView, shouldHighlightItemAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -166,6 +176,17 @@ class PhotosViewController: UICollectionViewController, UICollectionViewDelegate
             }
         }
     }
+    
+    //MARK: - UIViewControllerTransitioningDelegate
+    
+    func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return PresentDetailTransition()
+    }
+    
+    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return DismissDetailTransition()
+    }
+
     
     
     @IBAction func logOutUser(sender: AnyObject) {
