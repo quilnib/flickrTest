@@ -20,6 +20,7 @@ class DetailViewController: UIViewController {
         
         self.view.backgroundColor = UIColor(white: 1.0, alpha: 0.95)
         
+        //assuming all images are square, which isn't the case on flickr
         self.imageView = UIImageView(frame: CGRectMake(0, -320, self.view.bounds.size.width, self.view.bounds.size.width))
         self.view.addSubview(self.imageView!)
         
@@ -29,11 +30,6 @@ class DetailViewController: UIViewController {
                 self.imageView!.image = image
             }
         }
-        
-//        self.imageView?.image.si
-//        
-//        self.imageView?.frame = CGRectMake(0, -320, <#width: CGFloat#>, <#height: CGFloat#>)
-        
         
         var tap = UITapGestureRecognizer(target: self, action: "close")
         self.view.addGestureRecognizer(tap)

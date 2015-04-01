@@ -115,37 +115,9 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         self.presentViewController(viewController, animated: true, completion: nil)
     }
     
-    /*
-    // Uncomment this method to specify if the specified item should be highlighted during tracking
-    override func collectionView(collectionView: UICollectionView, shouldHighlightItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment this method to specify if the specified item should be selected
-    override func collectionView(collectionView: UICollectionView, shouldSelectItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
-    }
-    */
-
-    /*
-    // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-    override func collectionView(collectionView: UICollectionView, shouldShowMenuForItemAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return false
-    }
-
-    override func collectionView(collectionView: UICollectionView, canPerformAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) -> Bool {
-        return false
-    }
-
-    override func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject?) {
-    
-    }
-    */
     
     func refreshPhotos() {
-        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20"], maxCacheAge: FKDUMaxAgeNeverCache) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
             
             if (error != nil) {
                 //something went wrong
@@ -170,21 +142,36 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         
         if (self.pages > 1) {
             for( var i = 2; i <= self.pages; i++) {
-                FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20", "page": String(i)], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+                FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20", "page": String(i)], maxCacheAge: FKDUMaxAgeNeverCache) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
                     
                     if (error != nil) {
                         //something went wrong
-                        println("\(error.userInfo)")
+                        println("error retreiving rest of photos: \(error.userInfo)")
                     } else {
                         println("the response: \(response)")
                         var responseDictionary = response as NSDictionary
-                        self.photos += responseDictionary.valueForKeyPath("photos.photo") as [AnyObject]
+                        var dictionaryPhotos = responseDictionary.valueForKeyPath("photos.photo") as [AnyObject]
+                        var index = self.photos.count
+                        var indexArray: [NSIndexPath] = []
+                        for( var i = index; i < (self.photos.count + dictionaryPhotos.count); i++) {
+                            indexArray.append(NSIndexPath(forRow: i, inSection: 0))
+                        }
                         
                         dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                            
-                            self.collectionView!.reloadData()
-                            
+                            self.collectionView!.performBatchUpdates({ () -> Void in
+                                
+                                self.photos += dictionaryPhotos
+                                self.collectionView?.insertItemsAtIndexPaths(indexArray)
+                                
+                                }, completion: nil)
                         })
+                        
+//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+//                                
+//                                self.collectionView!.reloadData()
+//                                
+//                            })
+                        
                     }
                 }
             }
