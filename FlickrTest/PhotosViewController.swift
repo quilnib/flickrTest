@@ -148,7 +148,7 @@ class PhotosViewController: UICollectionViewController, UICollectionViewDelegate
     */
     
     func refreshPhotos() {
-        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["userID": self.flickrUserId!, "per_page": "20"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
             
             if (error != nil) {
                 //something went wrong
