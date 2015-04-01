@@ -19,22 +19,6 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
     var pages: Int?
     
     
-//    required init(coder aDecoder: NSCoder) {
-//        
-//        super.init(coder: aDecoder)
-//    }
-//    
-//    override init() {
-//        var layout = UICollectionViewFlowLayout()
-//        
-//        super.init(collectionViewLayout: layout)
-//        
-//        //This has to be called AFTER super so we can get the view initialized
-//        layout.itemSize = CGSizeMake( (view.bounds.width-2)/3, (view.frame.width-2)/3)
-//        layout.minimumInteritemSpacing = 1.0
-//        layout.minimumLineSpacing = 1.0
-//    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -49,9 +33,6 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         self.collectionView!.registerClass(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         self.title = "FlickrTest"
         self.collectionView?.backgroundColor = UIColor.whiteColor()
-        
-        //FlickrKit.sharedFlickrKit().logout()
-        //self.checkLoggedIn()
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -81,13 +62,11 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
     // MARK: UICollectionViewDataSource
 
     override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-        //#warning Incomplete method implementation -- Return the number of sections
         return 1
     }
 
 
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        //#warning Incomplete method implementation -- Return the number of items in the section
         return self.photos.count
     }
 
@@ -165,13 +144,6 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
                                 
                                 }, completion: nil)
                         })
-                        
-//                            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-//                                
-//                                self.collectionView!.reloadData()
-//                                
-//                            })
-                        
                     }
                 }
             }

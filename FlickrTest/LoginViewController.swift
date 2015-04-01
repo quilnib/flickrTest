@@ -36,7 +36,6 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
             } else {
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                     println("authorization url \(url!)")
-                    //self.view.addSubview(self.webView)
                     self.loadWebView(url!)
                 })
             }
@@ -77,11 +76,8 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
     
         var url: NSURL = request.URL
         
-        //println("the url is: \(url)")
-        
         if (url.scheme! != "http"  && url.scheme! != "https") {
             //we received the callback
-            //println("callback received: \(url)")
             
             //finish authorization and store user info
             FlickrKit.sharedFlickrKit().completeAuthWithURL(url, completion: { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
@@ -98,10 +94,8 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
             
             var urlFragments = url.fragment
             var urlComponents: [String] = []
-            //println("the fragment is: \(urlFragments)")
             if (urlFragments != nil) {
                 urlComponents = split(urlFragments!, {$0=="/"}, maxSplit: 10, allowEmptySlices: false) as [String]
-                //println("the components are: \(urlComponents)")
                 
                 for component in urlComponents  {
                     //handle if we receive https://m.flickr.com/#/home because that means the user declined to authorize
