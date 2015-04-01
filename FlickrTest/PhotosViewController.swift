@@ -16,6 +16,7 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
     var flickrUserId: String?
     var flickrFullName: String?
     var photos: [AnyObject] = []
+    var pages: Int?
     
     
 //    required init(coder aDecoder: NSCoder) {
@@ -50,35 +51,13 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         self.collectionView?.backgroundColor = UIColor.whiteColor()
         
         //FlickrKit.sharedFlickrKit().logout()
-        FlickrKit.sharedFlickrKit().checkAuthorizationOnCompletion { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
-            if (error != nil) {
-                //the user is not logged in and we should present the login process
-                //call the LoginViewController and login
-                self.performSegueWithIdentifier("showLogin", sender: self)
-            } else {
-                //the user's credentials are still present
-                //request the photos
-                self.flickrUserName = userName
-                self.flickrUserId = userId
-                self.flickrFullName = fullName
-                self.refreshPhotos()
-                println("still logged in")
-            }
-        }
+        //self.checkLoggedIn()
     }
 
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         
-        
-        //this isn't currently being called correctly because of the threading
-        if (self.flickrUserId != nil) {
-            //load the photos
-            println("load the photos")
-            self.refreshPhotos()
-        } else {
-            println("apparently we didn't want to load the photos")
-        }
+        self.checkLoggedIn()
     }
 
     
@@ -88,6 +67,13 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         if (segue.identifier == "showLogin") {
             //do any prep to the view controller that has to happen
             var loginController = segue.destinationViewController as LoginViewController
+            FlickrKit.sharedFlickrKit().logout()
+            //clean up any data that should be cleaned
+            self.flickrUserName = nil
+            self.flickrUserId = nil
+            self.flickrFullName = nil
+            self.photos.removeAll(keepCapacity: false)
+            self.collectionView!.reloadData()
         }
     }
     
@@ -117,7 +103,8 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
     
     // MARK: UICollectionViewDelegate
     
-    override func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+    override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        
         var photo = self.photos[indexPath.row] as NSDictionary
         var viewController = DetailViewController()
         //set the viewController to use a custom transition.  Be sure to implement the UIViewControllerTransitioningDelegate protocol
@@ -167,12 +154,39 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
                 println("the response: \(response)")
                 var responseDictionary = response as NSDictionary
                 self.photos = responseDictionary.valueForKeyPath("photos.photo") as [AnyObject]
+                self.pages = (responseDictionary.valueForKeyPath("photos.pages") as Int)
                 
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                     
                     self.collectionView!.reloadData()
+                    self.retreiveRestOfPhotos()
                     
                 })
+            }
+        }
+    }
+    
+    func retreiveRestOfPhotos() {
+        
+        if (self.pages > 1) {
+            for( var i = 2; i <= self.pages; i++) {
+                FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["user_id": self.flickrUserId!, "per_page": "20", "page": String(i)], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+                    
+                    if (error != nil) {
+                        //something went wrong
+                        println("\(error.userInfo)")
+                    } else {
+                        println("the response: \(response)")
+                        var responseDictionary = response as NSDictionary
+                        self.photos += responseDictionary.valueForKeyPath("photos.photo") as [AnyObject]
+                        
+                        dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                            
+                            self.collectionView!.reloadData()
+                            
+                        })
+                    }
+                }
             }
         }
     }
@@ -187,16 +201,31 @@ class PhotosViewController: UICollectionViewController, UIViewControllerTransiti
         return DismissDetailTransition()
     }
 
+    //MARK: - helper methods
+    
+    func checkLoggedIn() {
+        FlickrKit.sharedFlickrKit().checkAuthorizationOnCompletion { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
+            if (error != nil) {
+                //the user is not logged in and we should present the login process
+                //call the LoginViewController and login
+                println("\(error.userInfo)")
+                self.performSegueWithIdentifier("showLogin", sender: self)
+            } else {
+                //the user's credentials are still present
+                //request the photos
+                self.flickrUserName = userName
+                self.flickrUserId = userId
+                self.flickrFullName = fullName
+                self.refreshPhotos()
+            }
+        }
+    }
     
     
     @IBAction func logOutUser(sender: AnyObject) {
-        FlickrKit.sharedFlickrKit().logout()
-        //clean up any data that should be cleaned
-        self.flickrUserName = nil
-        self.flickrUserId = nil
-        self.flickrFullName = nil
-        self.photos.removeAll(keepCapacity: false)
+        
         self.performSegueWithIdentifier("showLogin", sender: self)
     }
+    
 
 }

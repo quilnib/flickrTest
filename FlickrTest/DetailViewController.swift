@@ -30,6 +30,10 @@ class DetailViewController: UIViewController {
             }
         }
         
+//        self.imageView?.image.si
+//        
+//        self.imageView?.frame = CGRectMake(0, -320, <#width: CGFloat#>, <#height: CGFloat#>)
+        
         
         var tap = UITapGestureRecognizer(target: self, action: "close")
         self.view.addGestureRecognizer(tap)

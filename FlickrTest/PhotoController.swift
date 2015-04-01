@@ -28,6 +28,7 @@ class PhotoController: NSObject {
         let request = NSURLRequest(URL: photoURL)
         var task = session.downloadTaskWithRequest(request, completionHandler: { (location: NSURL!, response: NSURLResponse!, error: NSError!) -> Void in
             
+            println("the response: \(response)")
             var data = NSData(contentsOfURL: location) //going from data to image instead of NSURL to image avoids a lot of problems
             var image = UIImage(data: data!)
             //SAMCache.sharedCache().setImage(image, forKey: key)
