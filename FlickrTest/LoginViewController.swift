@@ -15,8 +15,6 @@ class LoginViewController: UIViewController, UIWebViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = "Connect to Flickr"
-        
         self.logIntoFlickr()
     }
     

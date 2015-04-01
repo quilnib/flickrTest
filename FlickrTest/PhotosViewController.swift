@@ -10,7 +10,7 @@ import UIKit
 
 let reuseIdentifier = "PhotoCell"
 
-class PhotosViewController: UICollectionViewController {
+class PhotosViewController: UICollectionViewController, UICollectionViewDelegate {
 
     var flickrUserName: String?
     var flickrUserId: String?
@@ -18,29 +18,37 @@ class PhotosViewController: UICollectionViewController {
     var photos: [AnyObject] = []
     
     
-    required init(coder aDecoder: NSCoder) {
-        
-        super.init(coder: aDecoder)
-    }
-    
-    override init() {
-        var layout = UICollectionViewFlowLayout()
-        
-        super.init(collectionViewLayout: layout)
-        
-        //This has to be called AFTER super so we can get the view initialized
-        layout.itemSize = CGSizeMake( (view.bounds.width)/3, (view.frame.width)/3)
-        layout.minimumInteritemSpacing = 1.0
-        layout.minimumLineSpacing = 1.0
-    }
+//    required init(coder aDecoder: NSCoder) {
+//        
+//        super.init(coder: aDecoder)
+//    }
+//    
+//    override init() {
+//        var layout = UICollectionViewFlowLayout()
+//        
+//        super.init(collectionViewLayout: layout)
+//        
+//        //This has to be called AFTER super so we can get the view initialized
+//        layout.itemSize = CGSizeMake( (view.bounds.width-2)/3, (view.frame.width-2)/3)
+//        layout.minimumInteritemSpacing = 1.0
+//        layout.minimumLineSpacing = 1.0
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        //set the layout and default cell size/spacing
+        var layout = UICollectionViewFlowLayout()
+        self.collectionView?.setCollectionViewLayout(layout, animated: true)
+        layout.itemSize = CGSizeMake( (view.bounds.width-2)/3, (view.frame.width-2)/3)
+        layout.minimumInteritemSpacing = 1.0
+        layout.minimumLineSpacing = 1.0
+        
         // Register cell classes
         self.collectionView!.registerClass(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
+        self.collectionView!.delegate = self
         self.title = "FlickrTest"
+        self.collectionView?.backgroundColor = UIColor.whiteColor()
         
         //FlickrKit.sharedFlickrKit().logout()
         FlickrKit.sharedFlickrKit().checkAuthorizationOnCompletion { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
@@ -107,9 +115,9 @@ class PhotosViewController: UICollectionViewController {
     
         return cell
     }
-
+    
     // MARK: UICollectionViewDelegate
-
+    
     /*
     // Uncomment this method to specify if the specified item should be highlighted during tracking
     override func collectionView(collectionView: UICollectionView, shouldHighlightItemAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -140,7 +148,7 @@ class PhotosViewController: UICollectionViewController {
     */
     
     func refreshPhotos() {
-        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["userID": self.flickrUserId!, "per_page": "15"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["userID": self.flickrUserId!, "per_page": "20"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
             
             if (error != nil) {
                 //something went wrong
@@ -166,6 +174,7 @@ class PhotosViewController: UICollectionViewController {
         self.flickrUserName = nil
         self.flickrUserId = nil
         self.flickrFullName = nil
+        self.photos.removeAll(keepCapacity: false)
         self.performSegueWithIdentifier("showLogin", sender: self)
     }
 
