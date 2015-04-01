@@ -16,6 +16,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        
+        FlickrKit.sharedFlickrKit().initializeWithAPIKey("d5a731c9f690032577b467ec27dd8c91", sharedSecret: "ae54e58bd03c1fb7")
+        
+        
+        //TODO: set the customization code for the nav bar
+        
         return true
     }
 
@@ -39,6 +45,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+    
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+        println("we got a URL returned")
+        println("the url: \(url) and the string: \(sourceApplication!)")
+        
+        FlickrKit.sharedFlickrKit().completeAuthWithURL(url, completion: { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
+            if (error != nil) {
+                //something went wrong
+            } else {
+                println("holy balls it actually worked! \( userName + userId + fullName)")
+            }
+        })
+        return true
     }
 
 
