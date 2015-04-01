@@ -8,11 +8,15 @@
 
 import UIKit
 
-let reuseIdentifier = "Cell"
+let reuseIdentifier = "PhotoCell"
 
 class PhotosViewController: UICollectionViewController {
 
-    @IBOutlet var webView: UIWebView!
+    var flickrUserName: String?
+    var flickrUserId: String?
+    var flickrFullName: String?
+    var photos: [AnyObject] = []
+    
     
     required init(coder aDecoder: NSCoder) {
         
@@ -25,7 +29,7 @@ class PhotosViewController: UICollectionViewController {
         super.init(collectionViewLayout: layout)
         
         //This has to be called AFTER super so we can get the view initialized
-        layout.itemSize = CGSizeMake( (view.frame.width-2)/3, (view.frame.width-2)/3)
+        layout.itemSize = CGSizeMake( (view.bounds.width)/3, (view.frame.width)/3)
         layout.minimumInteritemSpacing = 1.0
         layout.minimumLineSpacing = 1.0
     }
@@ -34,7 +38,7 @@ class PhotosViewController: UICollectionViewController {
         super.viewDidLoad()
 
         // Register cell classes
-        self.collectionView!.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        self.collectionView!.registerClass(PhotoCell.self, forCellWithReuseIdentifier: reuseIdentifier)
 
         self.title = "FlickrTest"
         
@@ -42,45 +46,44 @@ class PhotosViewController: UICollectionViewController {
         FlickrKit.sharedFlickrKit().checkAuthorizationOnCompletion { (userName: String!, userId: String!, fullName: String!, error: NSError!) -> Void in
             if (error != nil) {
                 //the user is not logged in and we should present the login process
-                self.logIntoFlickr()
+                //call the LoginViewController and login
+                self.performSegueWithIdentifier("showLogin", sender: self)
             } else {
                 //the user's credentials are still present
+                //request the photos
+                self.flickrUserName = userName
+                self.flickrUserId = userId
+                self.flickrFullName = fullName
+                self.refreshPhotos()
                 println("still logged in")
             }
         }
-        
-        FlickrKit.sharedFlickrKit()
-        
-          // Do any additional setup after loading the view.
-        
-//        // 1. Begin Authorization, onSuccess display authURL in a UIWebView - the url is a callback into your app with a URL scheme
-//        - (FKDUNetworkOperation *) beginAuthWithCallbackURL:(NSURL *)url permission:(FKPermission)permission completion:(FKAPIAuthBeginCompletion)completion;
-//        // 2. After they login and authorize the app, need to get an auth token - this will happen via your URL scheme - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
-//        - (FKDUNetworkOperation *) completeAuthWithURL:(NSURL *)url completion:(FKAPIAuthCompletion)completion;
-//        // 3. On returning to the app, you want to re-log them in automatically - do it here
-//        - (FKFlickrNetworkOperation *) checkAuthorizationOnCompletion:(FKAPIAuthCompletion)completion;
-//        // 4. Logout - just removes all the stored keys
-//        - (void) logout;
-        
-        
-        
-        
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        
+        //this isn't currently being called correctly because of the threading
+        if (self.flickrUserId != nil) {
+            //load the photos
+            println("load the photos")
+            self.refreshPhotos()
+        } else {
+            println("apparently we didn't want to load the photos")
+        }
     }
 
-    /*
+    
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
+        if (segue.identifier == "showLogin") {
+            //do any prep to the view controller that has to happen
+            var loginController = segue.destinationViewController as LoginViewController
+        }
     }
-    */
+    
 
     // MARK: UICollectionViewDataSource
 
@@ -92,14 +95,15 @@ class PhotosViewController: UICollectionViewController {
 
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         //#warning Incomplete method implementation -- Return the number of items in the section
-        return 10
+        return self.photos.count
     }
 
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as UICollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as PhotoCell
     
         // Configure the cell
         cell.backgroundColor = UIColor.lightGrayColor()
+        cell.setPhoto(self.photos[indexPath.row] as NSDictionary)
     
         return cell
     }
@@ -135,33 +139,34 @@ class PhotosViewController: UICollectionViewController {
     }
     */
     
-    //MARK: - Flickr methods
-    
-    func logIntoFlickr() {
-        let callbackURL: NSURL = NSURL(string: "flickrtest://auth")!
-        FlickrKit.sharedFlickrKit().beginAuthWithCallbackURL(callbackURL, permission: FKPermissionRead, completion: { (url: NSURL!, error: NSError!) -> Void in
-            //code
+    func refreshPhotos() {
+        FlickrKit.sharedFlickrKit().call("flickr.photos.search", args: ["userID": self.flickrUserId!, "per_page": "15"], maxCacheAge: FKDUMaxAgeOneHour) { (response: [NSObject : AnyObject]!, error: NSError!) -> Void in
+            
             if (error != nil) {
                 //something went wrong
+                println("\(error.userInfo)")
             } else {
-                dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                    println("authorization url \(url!)")
-                    self.webView.frame = CGRectMake(0, 64, self.view.bounds.width, self.view.bounds.height - 64)
-                    self.view.addSubview(self.webView)
-                    self.loadWebView(url!)
-                })
+                println("the response: \(response)")
+                var responseDictionary = response as NSDictionary
+                self.photos = responseDictionary.valueForKeyPath("photos.photo") as [AnyObject]
                 
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    
+                    self.collectionView!.reloadData()
+                    
+                })
             }
-        })
-
+        }
     }
     
-    //MARK: - webView operations
     
-    func loadWebView(url:NSURL) {
-        var request = NSURLRequest(URL: url)
-        self.webView.loadRequest(request)
-        
+    @IBAction func logOutUser(sender: AnyObject) {
+        FlickrKit.sharedFlickrKit().logout()
+        //clean up any data that should be cleaned
+        self.flickrUserName = nil
+        self.flickrUserId = nil
+        self.flickrFullName = nil
+        self.performSegueWithIdentifier("showLogin", sender: self)
     }
 
 }

@@ -33,19 +33,48 @@
                             <outlet property="delegate" destination="Rna-t1-Csn" id="fx9-y7-IY3"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="z7a-9h-5sh"/>
+                    <navigationItem key="navigationItem" id="z7a-9h-5sh">
+                        <barButtonItem key="rightBarButtonItem" title="Log Out" id="J9R-Kw-zTG">
+                            <connections>
+                                <action selector="logOutUser:" destination="Rna-t1-Csn" id="JI8-Hj-5OK"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
-                        <outlet property="webView" destination="MuD-eI-0FR" id="oBq-xI-yys"/>
+                        <segue destination="DOS-1l-ctd" kind="modal" identifier="showLogin" id="cOY-u2-sTU"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cdX-qF-jqg" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <webView contentMode="scaleToFill" id="MuD-eI-0FR">
-                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                </webView>
             </objects>
             <point key="canvasLocation" x="1083" y="366"/>
+        </scene>
+        <!--Login View Controller-->
+        <scene sceneID="uS2-qB-8oo">
+            <objects>
+                <viewController id="DOS-1l-ctd" customClass="LoginViewController" customModule="FlickrTest" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="KYS-Op-g1V"/>
+                        <viewControllerLayoutGuide type="bottom" id="7gi-Ff-hIa"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="OHq-PE-KnS">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <webView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Sql-zt-EMO">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </webView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="exn-gU-wlo"/>
+                    <connections>
+                        <outlet property="webView" destination="Sql-zt-EMO" id="6I3-Ry-STt"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dtB-dZ-AMg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1573" y="372"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="JDU-g5-S91">
