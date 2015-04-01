@@ -36,6 +36,7 @@
                     </collectionView>
                     <navigationItem key="navigationItem" id="z7a-9h-5sh">
                         <barButtonItem key="rightBarButtonItem" title="Log Out" id="J9R-Kw-zTG">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <action selector="logOutUser:" destination="Rna-t1-Csn" id="JI8-Hj-5OK"/>
                             </connections>
@@ -85,6 +86,10 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Gmq-ZZ-9Ir">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" red="0.91372549020000005" green="0.5450980392" blue="0.43137254899999999" alpha="1" colorSpace="calibratedRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>

@@ -30,7 +30,6 @@ class PhotoCell: UICollectionViewCell {
         self.imageView!.frame = self.contentView.bounds
     }
     
-    // we still need to set the photo, but this will have to change a bit
     func setPhoto(photoDictionary: NSDictionary) {
         
         self.photo = photoDictionary
@@ -42,6 +41,11 @@ class PhotoCell: UICollectionViewCell {
             self.imageView!.image = image
         }
         
+    }
+    
+    //keeps the collectionView from flashing the old images when scrolling quickly
+    override func prepareForReuse() {
+        self.imageView?.image = UIImage()
     }
 
     
